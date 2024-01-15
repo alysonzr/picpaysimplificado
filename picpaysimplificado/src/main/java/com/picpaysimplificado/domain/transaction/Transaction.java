@@ -42,7 +42,11 @@ public class Transaction {
 	private User receiver;
 	
 	private LocalDateTime timestamp;
+
+	public Transaction() {
+		super();
+	}
 	
-	
+	 
 
 }
