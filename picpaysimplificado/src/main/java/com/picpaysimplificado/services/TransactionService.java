@@ -1,16 +1,8 @@
 package com.picpaysimplificado.services;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
 import com.picpaysimplificado.domain.transaction.Transaction;
 import com.picpaysimplificado.domain.user.User;
 import com.picpaysimplificado.dtos.TransactionDTO;
@@ -26,7 +18,7 @@ public class TransactionService {
 	private TransactionRepository repository; 
 	
 	@Autowired
-	private RestTemplate restTemplate;
+	private AuthorizationService authorizationService;
 	
 	@Autowired
 	private NotificationService notificationService;
@@ -37,7 +29,7 @@ public class TransactionService {
 		
 		userservice.validateTransation(sender, transactionDTO.value());
 		
-		boolean isAuthorized = this.authorizeTransaction(sender, transactionDTO.value());
+		boolean isAuthorized = this.authorizationService.authorizeTransaction(sender, transactionDTO.value());
 		if(!isAuthorized) 
 			throw new Exception("Transação Não Autorizada");
 		
@@ -59,20 +51,5 @@ public class TransactionService {
 		
 		return transaction;
 	}
-	
-	@SuppressWarnings("rawtypes")
-	public boolean authorizeTransaction(User sender, BigDecimal value) {
-		String url = "https://run.mocky.io/v3/5794d450-d2e2-4412-8131-73d0293ac1cc";
-		
-		ResponseEntity<Map> authorizationReponse = restTemplate.getForEntity(url, Map.class);
-		if(authorizationReponse.getStatusCode() == HttpStatus.OK) {
-			Map body =  authorizationReponse.getBody();
-		     if (body != null && body.containsKey("message")) {
-		    	 System.out.println(body.get("message").equals("Autorizado"));
-		    	 return body.get("message").equals("Autorizado");
-		     }
-		}
-		return false;
 
-	}
 }
